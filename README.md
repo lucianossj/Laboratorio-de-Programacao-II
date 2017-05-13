@@ -1,6 +1,6 @@
-Repositório com códigos de projetos desenvolvidos nas aulas de Algoritmos e Programação II na Faculdade SENAC em Porto Alegre.
+Repositório com códigos de projetos desenvolvidos nas aulas de Laboratório de Programação II na Faculdade SENAC em Porto Alegre (2017-1).
 
-Professor: Rafael Jeffman
+Professora: Eduarda Monteiro
 
 Ferramentas Utilizadas:
 
