@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import br.com.senacrs.labii.pet.view.AnimalsRegister;
+import br.com.senacrs.labii.pet.controller.AnimalsRegister;
 import br.com.senacrs.labii.pet.util.Data;
 
 public class Reports {

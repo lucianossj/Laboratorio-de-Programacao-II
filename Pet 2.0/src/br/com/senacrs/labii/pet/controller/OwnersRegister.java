@@ -1,7 +1,7 @@
 package br.com.senacrs.labii.pet.controller;
 
 import br.com.senacrs.labii.pet.db.DBConnection;
-import br.com.senacrs.labii.pet.view.ClientRegister;
+import br.com.senacrs.labii.pet.view.ClientRegisterView;
 import java.text.ParseException;
 
 import br.com.senacrs.labii.pet.model.Owner;
@@ -59,11 +59,11 @@ public class OwnersRegister {
 
         }
 
-        dbc.insertOwners(owner, dbc.connect());
+        dbc.insertOwners(dbc.connect(), owner);
 
         data.message("\n\n .:: CADASTRADO COM SUCESSO!!!\n\n");
 
-        ClientRegister.menuOwners();
+        ClientRegisterView.menuOwners();
 
     }
 
@@ -73,7 +73,7 @@ public class OwnersRegister {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         } else {
 
@@ -87,7 +87,7 @@ public class OwnersRegister {
 
             data.message("\n\n .:: ALTERADO COM SUCESSO!!!\n\n");
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         }
 
@@ -189,7 +189,6 @@ public class OwnersRegister {
     public static boolean searchToRemove(String search) throws SQLException {
 
         boolean found = false;
-        String ownerCod;
 
         Owner owner = new Owner();
 
@@ -217,7 +216,7 @@ public class OwnersRegister {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         } else {
 
@@ -231,7 +230,7 @@ public class OwnersRegister {
 
             data.message("\n\n .:: REMOVIDO COM SUCESSO!!!\n\n");
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         }
 
@@ -243,17 +242,16 @@ public class OwnersRegister {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         } else {
 
             data.message("\n\n - Clientes - DONOS - \n\n"
-                    + "C�d. | CPF           | Nome | E-mail\n");
-
+                    + "Cód. | CPF           | Nome | E-mail\n");
             
             dbc.listAllOwners(dbc.connect());
 
-            ClientRegister.menuOwners();
+            ClientRegisterView.menuOwners();
 
         }
 

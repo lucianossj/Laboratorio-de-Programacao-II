@@ -5,21 +5,14 @@ import java.util.ArrayList;
 
 import br.com.senacrs.labii.pet.model.Animal;
 import br.com.senacrs.labii.pet.model.Owner;
-import oo.Procedure;
-import oo.Scheduling;
-import procedures.ProceduresScheduling;
+import br.com.senacrs.labii.pet.model.Procedure;
+import br.com.senacrs.labii.pet.model.Scheduling;
 import br.com.senacrs.labii.pet.util.Data;
 import java.sql.SQLException;
 
 public class Main {
 
     static Data data = new Data();
-
-    public static ArrayList<Owner> owners = new ArrayList<Owner>();
-    public static int countRegOwners = 0;
-
-    public static ArrayList<Animal> animals = new ArrayList<Animal>();
-    public static int countRegAnimals = 0;
 
     public static ArrayList<Procedure> procedures = new ArrayList<Procedure>();
     public static int countRegProcs = 0;
@@ -50,19 +43,21 @@ public class Main {
         switch (op) {
 
             case "1":
-                clientRegister();
+                ClientRegisterView.menu();
                 break;
 
             case "2":
-                proceduresRegister();
+                ProceduresRegisterView.menu();
                 break;
 
             case "3":
-                proceduresScheduling();
+                ProceduresSchedulingView.menu();
+                break;
 
             case "4":
-                reports();
-
+                Reports.menu();
+                break;
+                
             case "5":
                 data.message("\n___________________________________\n\n.:: SISTEMA FINALIZADO!!! ::.");
                 System.exit(0);
@@ -72,30 +67,6 @@ public class Main {
                 mainMenu();
 
         }
-
-    }
-
-    static void clientRegister() throws ParseException, SQLException {
-
-        ClientRegister.menu();
-
-    }
-
-    static void proceduresRegister() throws ParseException {
-
-        ProceduresRegister.menu();
-
-    }
-
-    static void proceduresScheduling() throws ParseException {
-
-        ProceduresScheduling.menu();
-
-    }
-
-    static void reports() throws ParseException {
-
-        Reports.menu();
 
     }
 

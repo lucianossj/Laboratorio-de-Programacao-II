@@ -60,15 +60,5 @@ public class Owner {
 		this.email = email;
 		
 	}
-		
- 	public static void listAll(){
-		
-		for(int i = 0; i < Main.owners.size(); i++){
-			
-			data.message(Main.owners.get(i).getCod() + " | " + Main.owners.get(i).getCpf() + " | "+ Main.owners.get(i).getName() + " | " + Main.owners.get(i).getEmail()+"\n");
-			
-		}
-		
-	}
 	
 }
