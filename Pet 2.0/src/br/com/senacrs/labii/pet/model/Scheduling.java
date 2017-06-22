@@ -12,12 +12,12 @@ import br.com.senacrs.labii.pet.util.Data;
 
 public class Scheduling {
 
-	private int 					cod;
-	private Animal 					animal;
-	private Owner					owner;
-	private Date					date;
-	private Date					schedule;
-	private double					price;			
+	private int 	cod;
+	private Animal 	animal;
+	private Owner	owner;
+	private Date	date;
+	private Date	schedule;
+	private double	price;			
 	
 	static Data data = new Data();
 	

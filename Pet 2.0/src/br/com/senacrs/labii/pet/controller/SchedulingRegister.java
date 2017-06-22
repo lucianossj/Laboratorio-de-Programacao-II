@@ -6,10 +6,18 @@
 package br.com.senacrs.labii.pet.controller;
 
 import br.com.senacrs.labii.pet.db.DBConnection;
+import br.com.senacrs.labii.pet.model.Animal;
 import br.com.senacrs.labii.pet.model.Scheduling;
+import br.com.senacrs.labii.pet.model.Procedure;
 import br.com.senacrs.labii.pet.util.Data;
+import br.com.senacrs.labii.pet.view.ProceduresRegisterView;
+import br.com.senacrs.labii.pet.view.ProceduresSchedulingView;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  *
@@ -38,7 +46,7 @@ public class SchedulingRegister {
 
                 animal = verifyAnimal(animalSearch);
 
-                if (animal.getCod != null) {
+                if (animal != null) {
 
                     sched.setAnimal(animal);
                     animalOk = true;
@@ -61,7 +69,7 @@ public class SchedulingRegister {
                                     sched.setSchedule(schedule);
                                     scheduleOk = true;
 
-                                    ArrayList<Procecedure> procs = new ArrayList<Procecedure>();
+                                    ArrayList<Procedure> procs = new ArrayList<Procedure>();
 
                                     while (procsOk == false) {
 
@@ -90,7 +98,7 @@ public class SchedulingRegister {
 
                                         if (continueOp.equals("2")) {
 
-                                            Double totalPrice = 0;
+                                            Double totalPrice = 0.0;
 
                                             for(int i = 0; i < procs.size(); i++){
 
@@ -100,7 +108,7 @@ public class SchedulingRegister {
 
                                             sched.setPrice(totalPrice);
 
-                                            dbc.insertSchedule(dbc.connect(), sched);
+                                            dbc.insertSchedules(dbc.connect(), sched);
 
                                             dbc.insertSchedProcs(dbc.connect(), procs);
 
@@ -130,7 +138,9 @@ public class SchedulingRegister {
 
         data.message("\n\n .:: AGENDADO COM SUCESSO!!!\n\n");
 
-        ProceduresSchedulingView.menu();
+        ProceduresSchedulingView p = new ProceduresSchedulingView();
+        
+        p.menu();
 
     }
 
@@ -144,13 +154,13 @@ public class SchedulingRegister {
 
     }
 
-    public static Animal verifyAnimal(String searchAnimal) throws SQLException {
+    public Animal verifyAnimal(String searchAnimal) throws SQLException {
 
         boolean found = false;
 
         Animal a = new Animal();
 
-        a = dbc.searchAnimal(animal);
+        a = dbc.searchAnimals(dbc.connect(), searchAnimal);
 
         if (a != null) {
 
@@ -172,7 +182,7 @@ public class SchedulingRegister {
 
     }
 
-    public static boolean dateIsOk(Date date) {
+    public boolean dateIsOk(Date date) {
 
         boolean isOk = false;
 
@@ -192,7 +202,7 @@ public class SchedulingRegister {
 
     }
 
-    public static boolean scheduleIsOk(Date schedule, Date date) {
+    public boolean scheduleIsOk(Date schedule, Date date) throws SQLException {
 
         boolean isOk = dbc.verifySchedule(dbc.connect(), schedule, date);
 
@@ -207,9 +217,9 @@ public class SchedulingRegister {
 
     }
 
-    public static Procedure verifyProc(int cod) {
+    public Procedure verifyProc(int cod) throws SQLException {
 
-        Procedure proc = dbc.verifyProc(dbc.connect, cod);
+        Procedure proc = dbc.verifyProc(dbc.connect(), cod);
 
         if(proc == null){
 
@@ -222,19 +232,21 @@ public class SchedulingRegister {
 
     }
 
-    public static void updateScheduling() throws ParseException{
+    public void updateScheduling() throws ParseException, SQLException{
+        
+        ProceduresSchedulingView p = new ProceduresSchedulingView();
         
         if(dbc.verifyHasScheds(dbc.connect()) == false){
 
             data.message("\n\nERRO!!! Não há agendamentos cadastrados!\n\n");
 
-            ProceduresSchedulingView.menu();
+            p.menu();
             
         } else {
         
             data.message("\n\n - Alterar dados do Agendamento -\n\n");
             
-            while(Scheduling.searchToUpdate(data.readInt("Digite o Código do Agendamento: ")) == false){
+            while(searchToUpdate(data.readInt("Digite o Código do Agendamento: ")) == false){
             
                 data.message("\n\n .:: ERRO!!! Agendamento não encontrado!\n .:: Tente novamente.\n\n");
                 
@@ -242,16 +254,15 @@ public class SchedulingRegister {
             
             data.message("\n\n .:: ALTERADO COM SUCESSO!!!\n\n");
             
-            menu();
+            ProceduresRegisterView.menu();
             
         }
         
     }
 
-    public static boolean searchToUpdate(int search) throws ParseException{
+    public boolean searchToUpdate(int search) throws ParseException, SQLException{
         
         boolean found = false;
-        int schedCod;
 
         Scheduling sched = new Scheduling();
 
@@ -260,9 +271,9 @@ public class SchedulingRegister {
         if(sched != null){
 
             data.message("\n\n - Dados do Agendamento - \n\n"
-                        + "1. Animal: "     + Main.scheds.get(i).getAnimal().getName() 
-                        + "\n2. Data: "     + Main.scheds.get(i).getDate() 
-                        + "\n3. Horário: "  + Main.scheds.get(i).getSchedule());
+                        + "1. Animal: "     + sched.getAnimal().getName() 
+                        + "\n2. Data: "     + sched.getDate() 
+                        + "\n3. Horário: "  + sched.getSchedule());
 
             String op = data.readString("\n\nQue informação deseja alterar? ");
                 
@@ -276,12 +287,12 @@ public class SchedulingRegister {
                         
                     String newAnimal = data.readString("Digite o nome do animal: ");
                      
-                    Animal animal = ProceduresSchedulingView.verifyAnimal(newAnimal);
+                    Animal animal = verifyAnimal(newAnimal);
 
                     if(animal != null){
                             
                         animalOk = true;
-                        scheds.setAnimal(animal);
+                        sched.setAnimal(animal);
 
                     }
                         
@@ -297,9 +308,9 @@ public class SchedulingRegister {
                         
                     Date newDate = data.readDate("Digite a data: ");
                         
-                    if(ProceduresSchedulingView.dateIsOk(newDate) == true){
+                    if(dateIsOk(newDate) == true){
                             
-                        scheds.setDate(newDate);
+                        sched.setDate(newDate);
                         dateOk = true;
 
                     }
@@ -316,9 +327,9 @@ public class SchedulingRegister {
                         
                     Date newSchedule = data.readDate("Digite o horário: ");
                         
-                    if(ProceduresSchedulingView.scheduleIsOk(newSchedule) == true){
+                    if(scheduleIsOk(newSchedule, sched.getDate()) == true){
                             
-                        scheds.setSchedule(newSchedule);
+                        sched.setSchedule(newSchedule);
                         scheduleOk = true;
                             
                     }
@@ -329,7 +340,7 @@ public class SchedulingRegister {
                     
             default:
                 data.message("\n\nERRO!!! Alternativa inválida! Tente novamente.\n\n");
-                ProceduresSchedulingView.updateScheduling();
+                updateScheduling();
                             
             }
                 
@@ -345,19 +356,21 @@ public class SchedulingRegister {
 
     }
 
-    static void cancelScheduling() throws ParseException{
+    public void cancelScheduling() throws ParseException, SQLException{
+        
+        ProceduresSchedulingView p = new ProceduresSchedulingView();
         
         if(dbc.verifyHasScheds(dbc.connect()) == true){
             
             data.message("\n\nERRO!!! Não há agendamentos cadastrados!\n\n");
             
-            ProceduresSchedulingView.menu();
+            p.menu();
             
         } else {
             
             data.message("\n\n - Cancelar Agendamento -\n\n");
             
-            while(Scheduling.searchToRemove(data.readInt("Digite o Código do Agendamento: ")) == false){
+            while(searchToRemove(data.readInt("Digite o Código do Agendamento: ")) == false){
                 
                 data.message("\n\n .:: ERRO!!! Agendamento não encontrado!\n .:: Tente novamente.\n\n");
                 
@@ -365,13 +378,13 @@ public class SchedulingRegister {
             
             data.message("\n\n .:: REMOVIDO COM SUCESSO!!!\n\n");
             
-            ProceduresSchedulingView.menu();
+            p.menu();
             
         }
         
     }
 
-    public static boolean searchToRemove(int search){
+    public boolean searchToRemove(int search) throws SQLException{
         
         boolean found = false;
         
@@ -395,13 +408,15 @@ public class SchedulingRegister {
         
     }
 
-    public static void listAllSchedules() throws ParseException{
+    public void listAllSchedules() throws ParseException, SQLException{
+        
+        ProceduresSchedulingView p = new ProceduresSchedulingView();
         
         if(dbc.verifyHasScheds(dbc.connect()) == true){
 
             data.message("\n\nERRO!!! Não há agendamentos cadastrados!\n\n");
             
-            ProceduresSchedulingView.menu();
+            p.menu();
 
         } else {
 
@@ -410,7 +425,7 @@ public class SchedulingRegister {
 
             dbc.listAllScheds(dbc.connect());
 
-            ProceduresSchedulingView.menu();
+            p.menu();
 
         }
         

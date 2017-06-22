@@ -29,6 +29,10 @@ public class DateUtil {
         return(new SimpleDateFormat("dd/MM/yyyy").format(data));
     }
 
+    public static String hourToString(Date data){
+        return(new SimpleDateFormat("HH:mm").format(data));
+    }
+    
     public static String dateHourToString(Date data){
         SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String dataString = formatador.format(data);

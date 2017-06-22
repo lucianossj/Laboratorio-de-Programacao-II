@@ -8,7 +8,9 @@ package br.com.senacrs.labii.pet.db;
 import br.com.senacrs.labii.pet.model.Animal;
 import br.com.senacrs.labii.pet.model.Owner;
 import br.com.senacrs.labii.pet.model.Procedure;
+import br.com.senacrs.labii.pet.model.Scheduling;
 import br.com.senacrs.labii.pet.util.Data;
+import br.com.senacrs.labii.pet.util.DateUtil;
 import br.com.senacrs.labii.pet.view.ProceduresSchedulingView;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -31,7 +35,7 @@ public class DBConnection {
 
         Connection con = null;
 
-        String path = "jdbc:postgresql://localhost:5432/petshop";
+        String path = "jdbc:postgresql://localhost:5432/pet";
         String user = "postgres";
         String password = "123456";
 
@@ -87,7 +91,7 @@ public class DBConnection {
 
     public boolean verifyHasClients(Connection con) throws SQLException {
 
-        boolean hasClients = false;
+        boolean hasClients;
 
         String sql = "SELECT * FROM owners";
 
@@ -95,16 +99,16 @@ public class DBConnection {
 
         ResultSet rs = stmt.executeQuery();
 
-        rs.next();
-
-        if (rs.getInt("codOwner") == 0) {
-
-            hasClients = false;
-
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            hasClients = true;
+            
         } else {
 
-            hasClients = true;
-
+            hasClients = false;
+                        
         }
 
         return hasClients;
@@ -120,20 +124,17 @@ public class DBConnection {
         PreparedStatement stmt = con.prepareStatement(sql);
 
         ResultSet rs = stmt.executeQuery();
-
-        rs.next();
-
-        int test = 0;
-        test = rs.getInt("codOwner");
-
-        if (test != 0) {
-
+        
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
             ownerIsOk = true;
-
+            
         } else {
 
             ownerIsOk = false;
-
+                        
         }
 
         return ownerIsOk;
@@ -150,16 +151,16 @@ public class DBConnection {
 
         ResultSet rs = stmt.executeQuery();
 
-        rs.next();
-
-        if (rs.getInt("codAnimal") == 0) {
-
-            hasAnimals = false;
-
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            hasAnimals = true;
+            
         } else {
 
-            hasAnimals = true;
-
+            hasAnimals = false;
+                        
         }
 
         return hasAnimals;
@@ -202,7 +203,7 @@ public class DBConnection {
         while (rs.next()) {
 
             animal.setCod(rs.getInt("codAnimal"));
-            animal.setType(rs.getString("type"));
+            animal.setType(rs.getString("typeAnimal"));
             animal.setRace(rs.getString("race"));
             animal.setName(rs.getString("nameAnimal"));
 
@@ -293,7 +294,7 @@ public class DBConnection {
         while (rs.next()) {
 
             data.message(rs.getInt("codAnimal") + " | " + rs.getString("typeAnimal") + " | " + rs.getString("race") + " | "
-                    + rs.getString("nameAnimal") + " | " + rs.getInt("coodOwner") + "\n");
+                    + rs.getString("nameAnimal") + " | " + rs.getInt("codOwner") + "\n");
 
         }
 
@@ -325,16 +326,16 @@ public class DBConnection {
 
         ResultSet rs = stmt.executeQuery();
 
-        rs.next();
-
-        if (rs.getInt("codProcedure") == 0) {
-
-            hasProcedures = false;
-
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            hasProcedures = true;
+            
         } else {
 
-            hasProcedures = true;
-
+            hasProcedures = false;
+                        
         }
 
         return hasProcedures;
@@ -343,7 +344,7 @@ public class DBConnection {
     
     public void removeProcedure(Connection con, Procedure procedure) throws SQLException {
 
-        String sql = "DELETE FROM procedures WHERE codProcedure = '" + procedure.getCod() + "'";
+        String sql = "DELETE FROM procedures WHERE codProc = '" + procedure.getCod() + "'";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
@@ -356,7 +357,7 @@ public class DBConnection {
     
     public Procedure searchProcedures(Connection con, String search) throws SQLException {
 
-        String sql = "SELECT * FROM procedures WHERE codProcedure ='" + search + "' OR proc = '" + search + "'";
+        String sql = "SELECT * FROM procedures WHERE codProc ='" + search + "' OR proc = '" + search + "'";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
@@ -366,18 +367,18 @@ public class DBConnection {
 
         while (rs.next()) {
 
-            procedure.setCod(rs.getInt("codProcedure"));
+            procedure.setCod(rs.getInt("codProc"));
             procedure.setProc(rs.getString("proc"));
             procedure.setPrice(rs.getDouble("price"));
 
         }
 
-        return procedure;
-
         stmt.close();
         rs.close();
         con.close();
 
+        return procedure;
+        
     }
     
     public void listAllProcedures(Connection con) throws SQLException {
@@ -394,7 +395,7 @@ public class DBConnection {
             Locale ptBr = new Locale("pt", "BR");
             String priceString = NumberFormat.getCurrencyInstance(ptBr).format(d);
 
-            data.message(rs.getInt("codProcedure") + " | " + rs.getString("proc") + " | " + priceString + "\n");
+            data.message(rs.getInt("codProc") + " | " + rs.getString("proc") + " | " + priceString + "\n");
 
         }
 
@@ -406,6 +407,8 @@ public class DBConnection {
     
     public boolean verifyAllData(Connection con) throws SQLException, ParseException{
             
+        ProceduresSchedulingView p = new ProceduresSchedulingView();
+        
         boolean allIsOk = true;
         
         String sql = "SELECT * FROM Owners";
@@ -424,34 +427,32 @@ public class DBConnection {
         rs2.next();
         rs3.next();
         
-        if(rs.getInt("codOwner") == 0){
+        if(rs.isBeforeFirst()){
         
             data.message("\n\nERRO!!! Não existem donos cadastrados! Tente novamente. \n\n");
             
             allIsOk = false;
             
-            ProceduresSchedulingView.menu();
+            p.menu();
             
             
-        } else if (rs2.getInt("codAnimal") == 0){
+        } else if (rs2.isBeforeFirst()){
         
             data.message("\n\nERRO!!! Não existem animais cadastrados! Tente novamente. \n\n");
             
             allIsOk = false;
             
-            ProceduresSchedulingView.menu();
+            p.menu();
             
-        } else if (rs3.getInt("codProcedure") == 0){
+        } else if (rs3.isBeforeFirst()){
         
-            data.message("\n\nERRO!!! N�o existem procedimentos cadastrados! Tente novamente. \n\n");
+            data.message("\n\nERRO!!! Não existem procedimentos cadastrados! Tente novamente. \n\n");
             
             allIsOk = false;
             
-            ProceduresSchedulingView.menu();
+            p.menu();
             
         }
-        
-        return allIsOk;
         
         stmt.close();
         rs.close();
@@ -464,9 +465,11 @@ public class DBConnection {
 
         con.close();
 
+        return allIsOk;
+        
     }
 
-    public boolean verifySchedule(Connection con, Date schedule, Date date){
+    public boolean verifySchedule(Connection con, Date schedule, Date date) throws SQLException{
 
         boolean found = false;
 
@@ -476,58 +479,60 @@ public class DBConnection {
 
         ResultSet rs = stmt.executeQuery();
 
-        rs.next();
-
-        if(rs.getInt("codSched") == 0){
-
-            found = false;
-
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            found = true;
+            
         } else {
 
-            found = true;
-
+            found = false;
+                        
         }
-
-        return found;
 
         stmt.close();
         rs.close();
         con.close();
 
+        return found;
+        
     }
     
-    public Procedure verifyProc(Connection con, int cod){
+    public Procedure verifyProc(Connection con, int cod) throws SQLException{
 
-        Procedure proc;
+        Procedure proc = new Procedure();
 
-        String sql = "SELECT * FROM Procedures WHERE codProcedure = '"+ cod +"'";
+        String sql = "SELECT * FROM Procedures WHERE codProc = '"+ cod +"'";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
         ResultSet rs = stmt.executeQuery();
-
-        rs.next();
-
-        if(rs.getInt("codProcedure") == 0){
-
-            proc = null;
-
+       
+        if(rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            proc.setProc(rs.getString("proc"));
+            proc.setPrice(rs.getDouble("price"));
+            
         } else {
 
-            proc.setProc(rs.getString("procedure"));
-            proc.setPrice(rs.getDouble("price"));
-
+            proc = null;
+            
+            data.message("ENTROU AQUI - 2!!!");
+            
         }
-
-        return proc;
-
+        
         stmt.close();
         rs.close();
         con.close();
 
+        return proc;
+        
     }
 
-    public void insertSchedules(Connection con, Schedule sched){
+    public void insertSchedules(Connection con, Scheduling sched) throws SQLException{
 
         int     animalCod   = sched.getAnimal().getCod();
         int     ownerCod    = sched.getAnimal().getCodOwner();
@@ -535,8 +540,8 @@ public class DBConnection {
         Date    schedule    = sched.getSchedule();
         Double  price       = sched.getPrice();
 
-        String sql = "INSERT INTO Schedules (codAnimal, ownerCod, date, schedule, price) VALUES 
-                        ('"+ animalCod +"', '"+ ownerCod +"', '"+ date +"', '"+ schedule +"', '"+ price +"');";
+        String sql = "INSERT INTO Schedules (codAnimal, codOwner, date, schedule, totalPrice) VALUES "
+                + "('"+ animalCod +"', '"+ ownerCod +"', '"+ date +"', '"+ schedule +"', '"+ price +"');";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
@@ -547,7 +552,7 @@ public class DBConnection {
 
     }
 
-    public void insertSchedProcs(Connection con, ArrayList<Procedure> procs){
+    public void insertSchedProcs(Connection con, ArrayList<Procedure> procs) throws SQLException{
 
         String sql = "SELECT * FROM schedules DESC";
 
@@ -577,7 +582,7 @@ public class DBConnection {
 
     }
 
-    public Scheduling searchScheds(Connection con, String search) throws SQLException {
+    public Scheduling searchScheds(Connection con, int search) throws SQLException {
 
         String sql = "SELECT * FROM Schedules WHERE codSched ='" + search + "';";
 
@@ -589,9 +594,15 @@ public class DBConnection {
 
         while (rs.next()) {
 
+            Animal animal = new Animal();
+            Owner owner = new Owner();
+            
+            animal.setCod(rs.getInt("codAnimal"));
+            owner.setCod(rs.getInt("codOwner"));
+            
             sched.setCod(rs.getInt("codSched"));
-            sched.setAnimal().setCod(rs.getInt("codAnimal"));
-            sched.setOwner().setCod(rs.getInt("codOwner"));
+            sched.setAnimal(animal);
+            sched.setOwner(owner);
             sched.setDate(rs.getDate("date"));
             sched.setSchedule(rs.getDate("schedule"));
             sched.setPrice(rs.getDouble("price"));
@@ -604,7 +615,7 @@ public class DBConnection {
 
     public void removeSched(Connection con, Scheduling sched) throws SQLException {
 
-        String sql = "DELETE FROM Schedules WHERE codSched = '" + sched.getCod() + "'";
+        String sql = "DELETE FROM Schedules WHERE codSched = '" + sched.getCod() + "';";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
@@ -645,4 +656,233 @@ public class DBConnection {
 
     }
 
+    public boolean verifyHasScheds(Connection con) throws SQLException {
+
+        boolean hasScheds = false;
+
+        String sql = "SELECT * FROM Schedules";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if(!rs.isBeforeFirst()){
+        
+            rs.next();
+            
+            hasScheds = true;
+            
+        } else {
+
+            hasScheds = false;
+                        
+        }
+
+        return hasScheds;
+
+    }
+    
+    public void listAllRealizedProcedures(Connection con, Date today) throws SQLException{
+    
+        String sql = "SELECT * FROM Schedules ORDER BY date ASC;";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        rs.next();
+        
+        Date firstDate = rs.getDate("date");
+        
+        sql = "SELECT * FROM Schedules WHERE date BETWEEN '" + firstDate + "' AND '" + today + "'";
+        
+        stmt = con.prepareStatement(sql);
+        
+        rs = stmt.executeQuery();
+        
+        while(rs.next()){
+            
+            Scheduling  sched   = new Scheduling();
+            Animal      animal  = new Animal();
+            Owner       owner   = new Owner();            
+            
+            animal.setCod(rs.getInt("codAnimal"));
+            owner.setCod(rs.getInt("codOwner"));
+            
+            sched.setCod(rs.getInt("codSched"));
+            sched.setAnimal(animal);
+            sched.setOwner(owner);
+            sched.setDate(rs.getDate("date"));
+            sched.setSchedule(rs.getDate("schedule"));
+            sched.setPrice(rs.getDouble("price"));
+            
+            String nameAnimal = getAnimalName(connect(), sched.getAnimal().getCod());
+            String nameOwner = getOwnerName(connect(), sched.getOwner().getCod());
+            
+            String date = DateUtil.dateToString(sched.getDate());
+            String schedule = DateUtil.hourToString(sched.getSchedule());
+            
+            Double d = sched.getPrice();
+            Locale ptBr = new Locale("pt", "BR");
+            String priceString = NumberFormat.getCurrencyInstance(ptBr).format(d);
+            
+            ArrayList<Procedure> procs = new ArrayList<Procedure>();
+            
+            procs = getProcs(connect(), sched.getCod());
+            
+            data.message(sched.getCod() + " | " + nameAnimal + " | " + nameOwner + " | " + date + " | " + schedule+ " | " + priceString);
+                    
+            for(int i = 0; i < procs.size(); i++){
+            
+                data.message(" | " +procs.get(i).getProc()+"\n");
+                
+            }
+            
+        }
+        
+    }
+    
+    String getAnimalName(Connection con, int cod) throws SQLException{
+    
+        String nameAnimal;
+        
+        String sql = "SELECT * FROM Animals WHERE codAnimal = '" + cod + "'";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        rs.next();
+        
+        nameAnimal = rs.getString("name");
+        
+        return nameAnimal;
+        
+    }
+    
+    String getOwnerName(Connection con, int cod) throws SQLException{
+    
+        String nameOwner;
+        
+        String sql = "SELECT * FROM Owners WHERE codOwner = '" + cod + "'";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        rs.next();
+        
+        nameOwner = rs.getString("name");
+        
+        return nameOwner;
+        
+    }
+    
+    ArrayList<Procedure> getProcs(Connection con, int cod) throws SQLException{
+    
+        ArrayList<Integer> cods = new ArrayList<Integer>();
+        ArrayList<Procedure> procs = new ArrayList<Procedure>();
+                
+        String sql = "SELECT * FROM SchedProcs WHERE codSched = '" + cod + "'";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        while(rs.next()){
+        
+            cods.add(rs.getInt("codProc"));
+            
+        }
+        
+        for(int i = 0; i < cods.size() ; i++){
+        
+            Procedure procedure = new Procedure();
+            
+            sql = "SELECT * FROM Procedures WHERE codProc = '" + cods.get(i) + "'";
+            
+            stmt = con.prepareStatement(sql);
+            
+            rs = stmt.executeQuery();
+            
+            procedure.setProc(rs.getString("procedure"));
+            
+            procs.add(procedure);
+            
+        }
+        
+        return procs;
+        
+    }
+    
+    public void todayProcedures(Connection con, Date today) throws SQLException{
+    
+        String sql = "SELECT * FROM Schedules WHERE date = '" + today + "'";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        while(rs.next()){
+            
+            Scheduling  sched   = new Scheduling();
+            Animal      animal  = new Animal();
+            Owner       owner   = new Owner();            
+            
+            animal.setCod(rs.getInt("codAnimal"));
+            owner.setCod(rs.getInt("codOwner"));
+            
+            sched.setCod(rs.getInt("codSched"));
+            sched.setAnimal(animal);
+            sched.setOwner(owner);
+            sched.setDate(rs.getDate("date"));
+            sched.setSchedule(rs.getDate("schedule"));
+            sched.setPrice(rs.getDouble("price"));
+            
+            String nameAnimal = getAnimalName(connect(), sched.getAnimal().getCod());
+            String nameOwner = getOwnerName(connect(), sched.getOwner().getCod());
+            
+            String date = DateUtil.dateToString(sched.getDate());
+            String schedule = DateUtil.hourToString(sched.getSchedule());
+            
+            Double d = sched.getPrice();
+            Locale ptBr = new Locale("pt", "BR");
+            String priceString = NumberFormat.getCurrencyInstance(ptBr).format(d);
+            
+            ArrayList<Procedure> procs = new ArrayList<Procedure>();
+            
+            procs = getProcs(connect(), sched.getCod());
+            
+            data.message(sched.getCod() + " | " + nameAnimal + " | " + nameOwner + " | " + date + " | " + schedule+ " | " + priceString);
+                    
+            for(int i = 0; i < procs.size(); i++){
+            
+                data.message(" | " +procs.get(i).getProc()+"\n");
+                
+            }
+            
+        }
+        
+    }
+    
+    public Double totalEarnings(Connection con) throws SQLException{
+    
+        String sql = "SELECT * FROM Scheds;";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        Double total = 0.0;
+        
+        while(rs.next()){
+        
+            total = total + rs.getDouble("totalPrice");
+            
+        }
+        
+        return total;
+        
+    }
+    
 }

@@ -51,11 +51,17 @@ public class Main {
                 break;
 
             case "3":
-                ProceduresSchedulingView.menu();
+                
+                ProceduresSchedulingView p = new ProceduresSchedulingView();
+
+                p.menu();
                 break;
 
             case "4":
-                Reports.menu();
+                
+                ReportsView rv = new ReportsView();
+                
+                rv.menu();
                 break;
                 
             case "5":

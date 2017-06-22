@@ -69,7 +69,7 @@ public class OwnersRegister {
 
     public void updateOwner() throws ParseException, SQLException {
 
-        if (dbc.verifyHasClients(dbc.connect()) == true) {
+        if (dbc.verifyHasClients(dbc.connect()) == false) {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 
@@ -212,7 +212,7 @@ public class OwnersRegister {
 
     public void removeOwner() throws ParseException, SQLException {
 
-        if (dbc.verifyHasClients(dbc.connect()) == true) {
+        if (dbc.verifyHasClients(dbc.connect()) == false) {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 
@@ -238,7 +238,7 @@ public class OwnersRegister {
 
     public void listOwners() throws ParseException, SQLException {
 
-        if (dbc.verifyHasClients(dbc.connect()) == true) {
+        if (dbc.verifyHasClients(dbc.connect()) == false) {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
 

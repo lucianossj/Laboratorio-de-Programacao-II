@@ -1,5 +1,6 @@
 package br.com.senacrs.labii.pet.view;
 
+import br.com.senacrs.labii.pet.controller.SchedulingRegister;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -9,12 +10,14 @@ import java.util.Locale;
 import br.com.senacrs.labii.pet.model.Procedure;
 import br.com.senacrs.labii.pet.model.Scheduling;
 import br.com.senacrs.labii.pet.util.Data;
+import java.sql.SQLException;
 
 public class ProceduresSchedulingView {
 
 	static Data data = new Data();
-	
-	public static void menu() throws ParseException{
+	SchedulingRegister schedulingRegister = new SchedulingRegister();
+        
+	public void menu() throws ParseException, SQLException{
 		
 		data.message("___________________________________\n\n"
 				+ " - Agendamento de Procedimentos - \n\n"
@@ -30,80 +33,39 @@ public class ProceduresSchedulingView {
 		
 			case "1":
 				
-				scheduleProcedure();
+                            schedulingRegister.scheduleProcedure();
 				
-				break;
+                            break;
 				
 			case "2":
+								
+                            schedulingRegister.updateScheduling();
 				
-				if(Main.scheds.isEmpty()){
-					
-					data.message("\n\nERRO!!! Não existem procedimentos agendados! Tente novamente. \n\n");
-					
-					menu();
-					
-				} else {
-				
-					updateScheduling();
-				
-				}
-				
-				break;
+                            break;
 				
 			case "3":
 				
-				if(Main.scheds.isEmpty()){
-					
-					data.message("\n\nERRO!!! N�o existem procedimentos agendados! Tente novamente. \n\n");
-					
-					menu();
-					
-				} else {
-				
-					cancelScheduling();
-				
-				}
-				
-				break;
+                            schedulingRegister.cancelScheduling();
+			
+                            break;
 				
 			case "4":
-				
-				if(Main.scheds.isEmpty()){
-					
-					data.message("\n\nERRO!!! N�o existem procedimentos agendados! Tente novamente. \n\n");
-					
-					menu();
-					
-				} else {
-				
-					listAllSchedules();
-				
-				}
-				
-				break;
+			
+                            schedulingRegister.listAllSchedules();
+			
+                            break;
 				
 			case "5":
 				Main.mainMenu();
 				break;
 				
 			default:
-				data.message("\n\nERRO!!! Alternativa inv�lida! Tente novamente.\n\n");
+				data.message("\n\nERRO!!! Alternativa inválida! Tente novamente.\n\n");
 				menu();
 				break;
 				
 		}
 		
 	}
-	
-	static void listAllSchedules() throws ParseException{
 		
-		data.message("\n\n - Todos os Agendamentos (GERAL) -\n\n"
-				+ "C�d | Animal | Dono | Data | Hor�rio | Procedimentos\n");
-		
-		Scheduling.listAllSchedules();
-		
-		menu();
-		
-	}
-	
 }

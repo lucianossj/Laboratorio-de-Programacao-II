@@ -59,7 +59,7 @@ public class AnimalsRegister {
 
                                 if (verifyOwner(dono) == true) {
 
-                                    Owner owner = null;
+                                    Owner owner = new Owner();
                                     
                                     owner.setCod(dono);
                                     

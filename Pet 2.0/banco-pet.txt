@@ -1,0 +1,26 @@
+CREATE TABLE owners(
+
+    codOwner SERIAL NOT NULL PRIMARY KEY,
+    cpf VARCHAR(14) NOT NULL,
+    nameOwner VARCHAR(100) NULL,
+    email VARCHAR(100) NOT NULL
+    
+);
+
+CREATE TABLE animals(
+
+	codAnimal SERIAL NOT NULL PRIMARY KEY,
+    typeAnimal VARCHAR(25) NOT NULL,
+    race VARCHAR(25) NOT NULL,
+    nameAnimal VARCHAR(30) NOT NULL,
+    codOwner INTEGER FOREIGN KEY REFERENCES owners (codOwner)
+    
+);
+
+CREATE TABLE procedures(
+
+	codProcedure SERIAL NOT NULL PRIMARY KEY,
+    proc VARCHAR(100) NOT NULL,
+    price FLOAT NOT NULL
+    
+);

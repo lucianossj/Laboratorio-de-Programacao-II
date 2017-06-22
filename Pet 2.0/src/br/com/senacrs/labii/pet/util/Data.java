@@ -1,7 +1,5 @@
 package br.com.senacrs.labii.pet.util;
 
-import br.com.senacrs.labii.pet.util.Console;
-import br.com.senacrs.labii.pet.util.DateUtil;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -18,23 +16,17 @@ public class Data {
 
     public int readInt(String message) {
 
-        message(message);
-
         return console.scanInt(message);
 
     }
 
     public String readString(String message) {
 
-        message(message);
-
         return console.scanString(message);
 
     }
 
     public double readDouble(String message) {
-
-        message(message);
 
         return console.scanDouble(message);
         
