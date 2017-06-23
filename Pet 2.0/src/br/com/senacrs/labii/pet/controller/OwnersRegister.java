@@ -241,7 +241,7 @@ public class OwnersRegister {
         if (dbc.verifyHasClients(dbc.connect()) == false) {
 
             data.message("\n\nERRO!!! Não há clientes cadastrados!\n\n");
-
+    
             ClientRegisterView.menuOwners();
 
         } else {

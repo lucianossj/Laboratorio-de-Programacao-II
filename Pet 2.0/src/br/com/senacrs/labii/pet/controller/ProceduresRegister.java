@@ -120,6 +120,8 @@ public class ProceduresRegister {
 
             data.message("\n\nERRO!!! Não existem procedimentos cadastrados! Tente novamente. \n\n");
 
+            ProceduresRegisterView.menu();
+            
         } else {
 
             data.message("\n\n - Procedimentos -\n\n"

@@ -101,13 +101,13 @@ public class DBConnection {
 
         if(!rs.isBeforeFirst()){
         
-            rs.next();
-            
-            hasClients = true;
+            hasClients = false;
             
         } else {
 
-            hasClients = false;
+            rs.next();
+            
+            hasClients = true;
                         
         }
 
@@ -293,11 +293,23 @@ public class DBConnection {
 
         while (rs.next()) {
 
-            data.message(rs.getInt("codAnimal") + " | " + rs.getString("typeAnimal") + " | " + rs.getString("race") + " | "
-                    + rs.getString("nameAnimal") + " | " + rs.getInt("codOwner") + "\n");
+            Animal  animal  = new Animal();
+            Owner   owner   = new Owner();
+            
+            owner.setCod(rs.getInt("codOwner"));
+            
+            animal.setCod(rs.getInt("codAnimal"));
+            animal.setName(rs.getString("nameAnimal"));
+            animal.setType(rs.getString("typeAnimal"));
+            animal.setRace(rs.getString("race"));
+            
+            String nameOwner = getOwnerName(connect(), owner.getCod());
+            
+            data.message(animal.getCod() + " | " + animal.getType() + " | " + animal.getRace() + " | "
+                    + animal.getName() + " | " + nameOwner + "\n");
 
         }
-
+        
     }
 
     public void insertProcedures(Connection con, Procedure procedure) throws SQLException {
@@ -520,8 +532,6 @@ public class DBConnection {
 
             proc = null;
             
-            data.message("ENTROU AQUI - 2!!!");
-            
         }
         
         stmt.close();
@@ -534,16 +544,31 @@ public class DBConnection {
 
     public void insertSchedules(Connection con, Scheduling sched) throws SQLException{
 
-        int     animalCod   = sched.getAnimal().getCod();
-        int     ownerCod    = sched.getAnimal().getCodOwner();
+        int animalCod   = sched.getAnimal().getCod();
+        
+        String sql = "SELECT * FROM Animals WHERE codAnimal = '" + animalCod + "'";
+        
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        ResultSet rs = stmt.executeQuery();
+        
+        Animal animal = new Animal();
+        
+        while(rs.next()){
+        
+            animal.setCodOwner(rs.getInt("codOwner"));
+            
+        }
+        
+        int     ownerCod    = animal.getCodOwner();
         Date    date        = sched.getDate();
         Date    schedule    = sched.getSchedule();
         Double  price       = sched.getPrice();
 
-        String sql = "INSERT INTO Schedules (codAnimal, codOwner, date, schedule, totalPrice) VALUES "
+        sql = "INSERT INTO Schedules (codAnimal, codOwner, date, schedule, totalPrice) VALUES "
                 + "('"+ animalCod +"', '"+ ownerCod +"', '"+ date +"', '"+ schedule +"', '"+ price +"');";
 
-        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt = con.prepareStatement(sql);
 
         stmt.executeUpdate();
 
@@ -554,20 +579,24 @@ public class DBConnection {
 
     public void insertSchedProcs(Connection con, ArrayList<Procedure> procs) throws SQLException{
 
-        String sql = "SELECT * FROM schedules DESC";
+        String sql = "SELECT * FROM schedules ORDER BY codSched DESC";
 
         PreparedStatement stmt = con.prepareStatement(sql);
 
         ResultSet rs = stmt.executeQuery();
 
-        rs.next();
+        int codSched = 0;
+        
+        while(rs.next()){
 
-        int codSched = rs.getInt("codSched");
-
+            codSched = rs.getInt("codSched");
+            
+        }
+        
         rs.close();
-
+        
         for(int i = 0; i < procs.size(); i++){
-
+            
             sql = "INSERT INTO SchedProcs (codProc, codSched) VALUES ('"+procs.get(i).getCod()+"', '"+codSched+"');";
 
             stmt = con.prepareStatement(sql);
@@ -636,7 +665,7 @@ public class DBConnection {
 
         while (rs.next()) {
 
-            Double d = rs.getDouble("price");
+            Double d = rs.getDouble("totalPrice");
             Locale ptBr = new Locale("pt", "BR");
             String priceString = NumberFormat.getCurrencyInstance(ptBr).format(d);
 
@@ -690,9 +719,13 @@ public class DBConnection {
         
         ResultSet rs = stmt.executeQuery();
         
-        rs.next();
+        Date firstDate = today;
         
-        Date firstDate = rs.getDate("date");
+        while(rs.next()){
+        
+            firstDate = rs.getDate("date");
+            
+        }
         
         sql = "SELECT * FROM Schedules WHERE date BETWEEN '" + firstDate + "' AND '" + today + "'";
         
@@ -772,7 +805,7 @@ public class DBConnection {
         
         rs.next();
         
-        nameOwner = rs.getString("name");
+        nameOwner = rs.getString("nameOwner");
         
         return nameOwner;
         
@@ -867,7 +900,7 @@ public class DBConnection {
     
     public Double totalEarnings(Connection con) throws SQLException{
     
-        String sql = "SELECT * FROM Scheds;";
+        String sql = "SELECT * FROM Schedules;";
         
         PreparedStatement stmt = con.prepareStatement(sql);
         
